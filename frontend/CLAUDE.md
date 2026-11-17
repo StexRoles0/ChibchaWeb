@@ -1,59 +1,61 @@
-You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+# Frontend — Angular 18+ (standalone, signals)
 
-## TypeScript Best Practices
+Lee primero `../CLAUDE.md`, `../docs/api.md` y `../docs/ui.md`. El frontend **solo** conoce el contrato REST. No sabe nada de dominio, servicios ni mapeadores del backend.
 
-- Use strict type checking
-- Prefer type inference when the type is obvious
-- Avoid the `any` type; use `unknown` when type is uncertain
+## Estructura
 
-## Angular Best Practices
+```
+frontend/src/
+├── app/
+│   ├── core/
+│   │   ├── api/
+│   │   │   ├── dto.ts                # interfaces copiadas de docs/api.md (nombres del modelo)
+│   │   │   ├── acceso.api.ts         # una clase *Api por servicio del backend:
+│   │   │   ├── clientes.api.ts       #   AccesoApi, ClientesApi, EmpleadosApi, DistribuidoresApi,
+│   │   │   ├── ...                   #   ConsultasApi, DominiosApi, SoporteApi, MigracionApi, ContingenciaApi
+│   │   │   └── simulado/             # respuestas simuladas por endpoint (modo sin backend)
+│   │   ├── auth/sesion.store.ts      # signal<ResultadoAccesoDTO | null>, carga GET /auth/sesion
+│   │   ├── guardas.ts                # sinSesion, autenticado, esCliente, identidadPendiente, operacion('X')
+│   │   ├── interceptores.ts          # errores (401→/acceso, 403, 503 banner), withCredentials
+│   │   └── errores.ts                # ErrorApi {codigo, mensaje, campo?} + mapeo a mensajes
+│   ├── layout/                       # shell: barra superior, menú lateral por rol, banner de contingencia
+│   ├── features/
+│   │   ├── acceso/                   # M-01, callback
+│   │   ├── registro/                 # M-02..M-04 + registro.store.ts
+│   │   ├── cliente/                  # M-05..M-09
+│   │   ├── soporte/                  # M-10 (compartida), M-17
+│   │   ├── gestion/                  # M-11..M-16 (formulario M-13 reutilizable empleado/distribuidor)
+│   │   └── admin/                    # M-18..M-20
+│   ├── shared/                       # tabla, etiqueta-estado, campo, dialogo-confirmacion, monto pipe
+│   └── app.routes.ts                 # rutas y guardas de docs/ui.md
+├── styles/                           # tokens.scss (docs/ui.md), base.scss, componentes.scss
+└── environments/                     # apiBase: '/api/v1', simularApi: boolean
+```
 
-- Always use standalone components over NgModules
-- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
-- Do NOT set `changeDetection: ChangeDetectionStrategy.OnPush` explicitly. `OnPush` is the default in Angular v22+.
-- Use signals for state management
-- Implement lazy loading for feature routes
-- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
-- Use `NgOptimizedImage` for all static images.
-  - `NgOptimizedImage` does not work for inline base64 images.
+## Reglas
 
-## Accessibility Requirements
+- Componentes **standalone**, `ChangeDetectionStrategy.OnPush`, estado con `signal`/`computed`, formularios con **Reactive Forms tipados** y control de flujo `@if`/`@for`.
+- Cada feature carga sus rutas con `loadChildren`.
+- Las llamadas HTTP van solo en `core/api/*.api.ts`. Los componentes no usan `HttpClient` directamente.
+- Las interfaces de `dto.ts` se llaman igual que en el modelo (`ResumenDTO`, `DatosClienteDTO`, …). No inventes otras formas: si una pantalla necesita un dato que no está en el contrato, avisa al orquestador.
+- Los errores 422 se muestran debajo del campo que indica `error.campo`. Los demás errores se muestran en un aviso arriba del formulario.
+- Las validaciones del frontend (obligatorio, formato de correo, patrón de franquicia, 63 caracteres del dominio) son **solo ayuda** para el usuario. El backend siempre vuelve a validar.
+- El monto se calcula con RN-01 solo como vista previa en M-03. Se usa aritmética en centavos, no `float` directo.
+- Los textos de la interfaz van en español, con el tono de los mockups.
+- Accesibilidad: cada `label` tiene `for`, el foco se ve, los diálogos atrapan el foco, el contraste es AA y las etiquetas de estado tienen texto además del color.
 
-- It MUST pass all AXE checks.
-- It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
+## Modo simulado (para trabajar en paralelo con el backend)
 
-## Components
+`environment.simularApi = true` activa `simuladoInterceptor`, que responde según `core/api/simulado/` con los datos de ejemplo de `docs/api.md` y `seed_dev.sql`. Esto deja trabajar en cada pantalla antes de que exista el endpoint. Cuando el endpoint está listo, se apaga para esa ruta y se prueba contra el backend real. El modo simulado nunca se activa en el build de producción.
 
-- Keep components small and focused on a single responsibility
-- Use `input()` and `output()` functions instead of decorators
-- Use `model()` for two-way bound properties with `[(prop)]` syntax instead of pairing `input()` with `output()`
-- Use `computed()` for derived state
-- Use `linkedSignal()` for state derived from multiple reactive sources that must stay synchronized
-- Prefer inline templates for small components
-- Prefer Signal Forms (`@angular/forms/signals`) for new forms. They are stable in Angular v22+ and provide signal-based state, type-safe field access, and schema-based validation
-- When not using Signal Forms, prefer Reactive forms instead of Template-driven ones
-- Do NOT use `ngClass`, use `class` bindings instead
-- Do NOT use `ngStyle`, use `style` bindings instead
-- Do NOT import `CommonModule`, import only the directives and pipes the template uses, such as `AsyncPipe` or `DatePipe`
-- When using external templates/styles, use paths relative to the component TS file.
+## Desarrollo
 
-## State Management
+```bash
+npm install
+npm start                 # ng serve con proxy.conf.json: /api → http://localhost:8000
+ng test --watch=false     # unidades (stores, guardas, interceptores, pipes, formularios)
+ng lint
+npx playwright test       # e2e (requiere backend con SIMULAR_EXTERNOS=true)
+```
 
-- Use signals for local component state
-- Use `computed()` for derived state
-- Keep state transformations pure and predictable
-- Do NOT use `mutate` on signals, use `update` or `set` instead
-
-## Templates
-
-- Keep templates simple and avoid complex logic
-- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
-- Use the async pipe to handle observables
-- Do not assume globals like (`new Date()`) are available.
-
-## Services
-
-- Design services around a single responsibility
-- Use the `providedIn: 'root'` option for singleton services
-- Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
-- Use the `inject()` function instead of constructor injection
+Login en desarrollo: con el proveedor simulado, M-01 muestra el campo "correo de prueba" (solo si `!environment.production`), que manda el código `dev:<correo>`. Correos sembrados: `gestion@`, `soporte@` y `admin@chibchaweb.co`. Cualquier otro correo pasa por el registro.

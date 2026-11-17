@@ -1,0 +1,16 @@
+# Diferencias entre el código y el modelo en EA
+
+Hay que pasar estos cambios a Enterprise Architect y al documento de modelado (versión 1.1) para que el modelo y el código coincidan en la entrega final. El código **ya** sigue esta lista. Lo que se agregue durante la implementación se anota aquí.
+
+| # | Diagrama | Cambio | Motivo |
+|---|---|---|---|
+| P-01 | DC-MDO-01 (nuevo paquete *Repositorios*) | Agregar las interfaces «interface» `RepositorioUsuario`, `RepositorioSuscripcion`, `RepositorioComision`, `RepositorioSolicitudDominio`, `RepositorioTicket`, `RepositorioMigracion` y `RepositorioCatalogo`, con los métodos públicos de su mapeador (ver `modelo/dominio.md`). | D-01: el servicio no debe depender de la persistencia. |
+| P-02 | DC-SRV-01 | Cambiar el tipo de los atributos de los servicios de `MapeadorX` a `RepositorioX`, y las dependencias de servicio → mapeador por servicio → repositorio. | D-01. |
+| P-03 | DC-PER-01 | Agregar una realización (▷ punteada) de cada `MapeadorX` hacia `RepositorioX`. Se mantiene la herencia de `Mapeador<T>` y el «bind». | D-01. |
+| P-04 | DC-MDO-01 / DC-PER-01 | Agregar «interface» `UnidadDeTrabajo` (`iniciar`, `confirmar`, `revertir`) en el dominio y `UnidadDeTrabajoDjango` en la persistencia. `ServicioMigracion` recibe `-unidadTrabajo: UnidadDeTrabajo`. | RN-27: la ejecución real de la migración es todo o nada. |
+| P-05 | DC-MDO-01 / DC-PER-01 | Agregar `+restaurar(contenido: String): void` a `RepositorioUsuario`, `RepositorioSuscripcion`, `RepositorioComision` y `RepositorioSolicitudDominio` (y a sus mapeadores). | `ServicioContingencia.sincronizarRespaldo` necesita reinsertar un evento respaldado sin conocer el mapeador. |
+| P-06 | DC-SRV-01 | Agregar `ServicioClientes.consultarSitios(idCliente: Integer): ResumenDTO [0..*]` y `ServicioContingencia.consultarRespaldoPendiente(): ResumenDTO [0..*]`. | El selector de sitio de M-10 y la tabla de pendientes de M-20 no tenían de dónde sacar sus datos. |
+| P-07 | DC-SRV-01 | `ResultadoAccesoDTO` + `identificadorExterno: String [0..1]` (lo llena el servicio cuando `registrado = false`; la vista lo guarda en la sesión y **no** lo manda en el JSON). `DatosClienteDTO` + `identificadorExterno: String [0..1]`, `nombre: String [0..1]`, `correo: String [0..1]` (los llena la vista desde la sesión). | Como el código OAuth es de un solo uso, `registrarse` necesita recibir la identidad ya verificada para `vincularCuenta`. |
+| P-08 | DC-SRV-01 | Agregar `ServicioComisiones.consultarComisionesSinCheque(): ResumenDTO [0..*]`. | La tarea `generar_cheques` necesita saber a qué comisiones emitirles cheque sin acceder a la persistencia. |
+| P-09 | DC-MDO-01 | Agregar la jerarquía de excepciones del dominio `ErrorDominio` ← `ValidacionError`, `ReglaNegocioError`, `EstadoInvalidoError`, `NoEncontradoError`, `DuplicadoError`, `ContingenciaActivaError` (opcional en el diagrama; se puede mencionar en el texto). | Para traducirlas de forma uniforme a HTTP (`api.md`). |
+| P-10 | Documento, sección de adaptadores | Mencionar que hay implementaciones simuladas de las 5 interfaces de integración para desarrollo (D-06). No hace falta agregarlas al diagrama. | Así el docente sabe por qué existen. |
