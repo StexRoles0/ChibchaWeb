@@ -1,0 +1,45 @@
+.pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.pestana {
+  padding: 12px 20px;
+  margin-bottom: -1px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--tinta-2);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+
+  &[aria-selected='true'] {
+    font-weight: 700;
+    color: var(--verde);
+    border-bottom-color: var(--verde);
+  }
+
+  &:hover {
+    color: var(--verde);
+  }
+}
+
+.aviso {
+  margin-bottom: 20px;
+}
+
+.nota {
+  margin-bottom: 20px;
+  color: var(--tinta-2);
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}

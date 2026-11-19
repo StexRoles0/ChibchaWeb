@@ -1,0 +1,11 @@
+id,idCliente,subdominio,paquete,plan,plataforma
+H-001,L-001,floristeriamarta.chibchaweb.com,Chibcha-Oro,Semestral,UNIX
+H-002,L-002,carlospardo.chibchaweb.com,Chibcha-Plata,Mensual,WINDOWS
+H-003,L-003,dianaortiz.chibchaweb.com,Chibcha-Platino,Anual,UNIX
+H-004,L-004,luisherrera.chibchaweb.com,Chibcha-Oro,Trimestral,UNIX
+H-005,L-005,sandramejia.chibchaweb.com,Chibcha-Plata,Mensual,UNIX
+H-006,L-001,mal_subdominio,Chibcha-Oro,Mensual,UNIX
+H-007,L-002,otro.chibchaweb.com,Chibcha-Diamante,Mensual,UNIX
+H-008,L-003,dos.chibchaweb.com,Chibcha-Oro,Quincenal,UNIX
+H-009,L-099,fantasma.chibchaweb.com,Chibcha-Oro,Mensual,UNIX
+H-010,L-004,mac.chibchaweb.com,Chibcha-Oro,Mensual,MAC

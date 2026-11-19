@@ -1,0 +1,207 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.saltar {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 20;
+  padding: 8px 12px;
+  background: var(--blanco);
+  border-radius: 6px;
+
+  &:focus {
+    top: 8px;
+  }
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--alto-barra);
+  padding: 0 24px;
+  color: var(--blanco);
+  background: var(--verde);
+
+  :focus-visible {
+    outline-color: var(--blanco);
+  }
+}
+
+.espacio {
+  flex: 1;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--blanco);
+  text-decoration: none;
+
+  b {
+    color: var(--oro);
+  }
+
+  .sol {
+    color: var(--oro);
+  }
+}
+
+.rol {
+  padding: 4px 14px;
+  font-size: 13px;
+  background: rgb(255 255 255 / 14%);
+  border-radius: 999px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tinta);
+  background: var(--oro);
+  border-radius: 50%;
+}
+
+.salir,
+.hamburguesa {
+  height: 36px;
+  padding: 0 14px;
+  font: inherit;
+  color: var(--blanco);
+  background: transparent;
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: rgb(255 255 255 / 12%);
+  }
+}
+
+.hamburguesa {
+  display: none;
+  font-size: 18px;
+}
+
+.cuerpo {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: var(--ancho-menu);
+  padding: 20px 12px;
+  background: var(--blanco);
+  border-right: 1px solid var(--linea);
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    color: var(--tinta-2);
+    text-decoration: none;
+    border-radius: 8px;
+
+    &:hover {
+      background: var(--fondo);
+    }
+
+    &.activo {
+      font-weight: 600;
+      color: var(--verde);
+      background: var(--verde-claro);
+
+      .punto {
+        background: var(--verde);
+      }
+    }
+  }
+}
+
+.punto {
+  width: 8px;
+  height: 8px;
+  background: var(--tinta-3);
+  border-radius: 50%;
+}
+
+.menu-titulo {
+  margin: 0 0 8px 14px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--tinta-2);
+}
+
+.pie {
+  margin-top: auto;
+  padding: 0 14px;
+  font-size: 13px;
+  color: var(--tinta-2);
+}
+
+.contenido {
+  flex: 1;
+  min-width: 0;
+  padding: 36px 56px;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburguesa {
+    display: inline-block;
+  }
+
+  .usuario,
+  .rol {
+    display: none;
+  }
+
+  .barra {
+    padding: 0 16px;
+  }
+
+  .menu {
+    position: fixed;
+    top: var(--alto-barra);
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.2s;
+
+    &.abierto {
+      transform: none;
+      visibility: visible;
+    }
+  }
+
+  .contenido {
+    padding: 24px 20px;
+  }
+}

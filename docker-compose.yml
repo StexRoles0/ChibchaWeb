@@ -1,50 +1,102 @@
+# Funciona sin .env: todos los valores tienen un defecto de desarrollo.
+# No ejecutar "docker compose down -v" (borraría los datos de Postgres).
+
+x-entorno-backend: &entorno-backend
+  DATABASE_URL: ${DATABASE_URL_DOCKER:-postgres://${POSTGRES_USER:-chibcha}:${POSTGRES_PASSWORD:-chibcha123}@db:5432/${POSTGRES_DB:-chibchaweb}}
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-clave-solo-para-desarrollo-no-usar-en-produccion}
+  DJANGO_DEBUG: ${DJANGO_DEBUG:-True}
+  DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend  # fijo: el proxy del frontend llega con Host backend:8000
+  CLAVE_CIFRADO: ${CLAVE_CIFRADO:-ZGV2LWNsYXZlLWNpZnJhZG8tMzItYnl0ZXMtMDAwMDA=}
+  ALGORITMO_CIFRADO: ${ALGORITMO_CIFRADO:-AES}
+  RUTA_RESPALDO: ${RUTA_RESPALDO:-/app/respaldo/respaldo.log}
+  SIMULAR_EXTERNOS: ${SIMULAR_EXTERNOS:-true}
+  OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+  OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+  OIDC_DISCOVERY_URL: ${OIDC_DISCOVERY_URL:-https://accounts.google.com/.well-known/openid-configuration}
+  RUTA_DOCS: /docs
+  TZ: America/Bogota
+
 services:
   db:
-    image: postgres:17-alpine
-    container_name: chibcha_db
+    image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-chibchaweb}
+      POSTGRES_USER: ${POSTGRES_USER:-chibcha}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chibcha123}
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - datos_pg16:/var/lib/postgresql/data
+      # Solo se ejecutan cuando el volumen está vacío (primer arranque)
+      - ./docs/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./docs/seed_dev.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   backend:
     build: ./backend
-    container_name: chibcha_backend
     restart: unless-stopped
-    env_file: .env
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
+    env_file:
+      - path: .env
+        required: false
+    environment: *entorno-backend
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./docs:/docs:ro
     depends_on:
       db:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
-    container_name: chibcha_frontend
+    build:
+      context: ./frontend
+      target: dev
     restart: unless-stopped
     ports:
       - "4200:4200"
     volumes:
       - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
+      - node_modules_front:/app/node_modules
+      - /app/.angular  # la caché de ng no se escribe como root en el host
     depends_on:
       - backend
 
+  # Opcional: etapa de producción (nginx). Uso: docker compose --profile prod up frontend_prod
+  frontend_prod:
+    profiles: [prod]
+    build:
+      context: ./frontend
+      target: prod
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  # Tareas programadas (D-09): misma imagen del backend con supercronic.
+  # Los comandos se lanzan solo a su hora (ver backend/crontab).
+  tareas:
+    build: ./backend
+    restart: unless-stopped
+    init: true  # supercronic falla como PID 1 en esta versión (fork exec)
+    command: ["supercronic", "/app/crontab"]
+    env_file:
+      - path: .env
+        required: false
+    environment: *entorno-backend
+    volumes:
+      - ./backend:/app
+      - ./docs:/docs:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
-  postgres_data:
-  frontend_node_modules:
+  datos_pg16:
+  node_modules_front:

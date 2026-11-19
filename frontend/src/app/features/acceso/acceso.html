@@ -1,0 +1,69 @@
+<div class="pagina-acceso">
+  <aside class="hero">
+    <app-marca />
+    <div class="hero-texto">
+      <p class="titular">Tu sitio web, hospedado desde Sugamuxi.</p>
+      <p class="bajada">
+        Hospedaje Windows y Unix para Colombia y la región, con soporte técnico por niveles de
+        servicio.
+      </p>
+    </div>
+  </aside>
+
+  <main class="panel">
+    <div class="caja">
+      <h1>Bienvenido</h1>
+      <p class="intro">
+        Ingresa con tu cuenta del proveedor de identidad. No guardamos contraseñas.
+      </p>
+
+      @if (error(); as e) {
+        <p class="aviso error" role="alert">{{ e }}</p>
+      }
+
+      @if (modoPrueba) {
+        <div class="campo prueba" [class.con-error]="correo.invalid && correo.touched">
+          <label for="correo-prueba">Correo de prueba (solo desarrollo)</label>
+          <input
+            id="correo-prueba"
+            type="email"
+            list="correos-prueba"
+            autocomplete="off"
+            placeholder="steven@correo.co"
+            [formControl]="correo"
+            [attr.aria-invalid]="correo.invalid && correo.touched ? 'true' : null"
+            [attr.aria-describedby]="
+              correo.invalid && correo.touched ? 'correo-prueba-error' : null
+            "
+          />
+          <datalist id="correos-prueba">
+            @for (c of correosPrueba; track c) {
+              <option [value]="c"></option>
+            }
+          </datalist>
+          @if (correo.invalid && correo.touched) {
+            <p class="error" id="correo-prueba-error" role="alert">
+              Escribe un correo de prueba válido para continuar.
+            </p>
+          }
+        </div>
+      }
+
+      <button type="button" class="opcion principal" [disabled]="ocupado()" (click)="iniciar()">
+        <span class="id" aria-hidden="true">ID</span>
+        {{ ocupado() ? 'Redirigiendo…' : 'Iniciar sesión con proveedor externo' }}
+      </button>
+
+      <p class="separador"><span>¿Aún no tienes cuenta?</span></p>
+
+      <button type="button" class="opcion" [disabled]="ocupado()" (click)="iniciar()">
+        Crear una cuenta
+      </button>
+
+      <p class="nota">
+        <span aria-hidden="true">ℹ️</span> Al crear la cuenta también te autenticarás con el
+        proveedor externo; tu nombre y correo llegarán verificados.
+      </p>
+    </div>
+  </main>
+</div>

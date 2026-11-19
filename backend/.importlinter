@@ -1,0 +1,107 @@
+[importlinter]
+root_packages =
+    chibchaweb
+    config
+include_external_packages = True
+
+# Orden de capas: las de arriba pueden importar a las de abajo, no al revés.
+# El dominio queda abajo; persistencia y adaptadores son "independientes" entre sí
+# y solo importan el dominio.
+[importlinter:contract:capas]
+name = Capas: web -> servicio -> dominio
+type = layers
+layers =
+    chibchaweb.web
+    chibchaweb.servicio
+    chibchaweb.dominio
+
+[importlinter:contract:dominio-puro]
+name = El dominio no conoce frameworks ni otras capas
+type = forbidden
+source_modules =
+    chibchaweb.dominio
+forbidden_modules =
+    django
+    rest_framework
+    psycopg
+    httpx
+    authlib
+    chibchaweb.servicio
+    chibchaweb.persistencia
+    chibchaweb.adaptadores
+    chibchaweb.web
+    chibchaweb.tareas
+    config
+
+[importlinter:contract:servicio-sin-persistencia]
+name = El servicio solo depende del dominio (nunca de mapeadores, ORM ni DRF)
+type = forbidden
+source_modules =
+    chibchaweb.servicio
+forbidden_modules =
+    chibchaweb.persistencia
+    chibchaweb.adaptadores
+    chibchaweb.web
+    chibchaweb.tareas
+    django
+    rest_framework
+    config
+
+[importlinter:contract:persistencia]
+name = La persistencia solo implementa el dominio
+type = forbidden
+source_modules =
+    chibchaweb.persistencia
+forbidden_modules =
+    chibchaweb.servicio
+    chibchaweb.adaptadores
+    chibchaweb.web
+    chibchaweb.tareas
+    rest_framework
+
+[importlinter:contract:adaptadores]
+name = Los adaptadores solo implementan el dominio
+type = forbidden
+source_modules =
+    chibchaweb.adaptadores
+forbidden_modules =
+    chibchaweb.servicio
+    chibchaweb.persistencia
+    chibchaweb.web
+    chibchaweb.tareas
+    rest_framework
+
+[importlinter:contract:web]
+name = La web solo conoce servicios y DTO
+type = forbidden
+# Se permite el camino indirecto web -> config.contenedor -> (todas las capas).
+allow_indirect_imports = True
+source_modules =
+    chibchaweb.web
+    chibchaweb.tareas
+forbidden_modules =
+    chibchaweb.dominio
+    chibchaweb.persistencia
+    chibchaweb.adaptadores
+
+[importlinter:contract:persistencia-adaptadores-independientes]
+name = Persistencia y adaptadores no se conocen entre sí
+type = independence
+modules =
+    chibchaweb.persistencia
+    chibchaweb.adaptadores
+
+[importlinter:contract:transaccion-neutra]
+name = La cuenta de escrituras por transacción no conoce ninguna capa (D-33)
+type = forbidden
+source_modules =
+    chibchaweb.transaccion
+forbidden_modules =
+    chibchaweb.dominio
+    chibchaweb.servicio
+    chibchaweb.persistencia
+    chibchaweb.adaptadores
+    chibchaweb.web
+    chibchaweb.tareas
+    config
+    rest_framework

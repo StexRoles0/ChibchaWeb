@@ -1,11 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { BannerContingencia } from './layout/banner-contingencia';
 
 @Component({
   selector: 'app-root',
-  standalone: false,
-  styleUrl: './app.scss',
-  templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterOutlet, BannerContingencia],
+  template: `
+    <app-banner-contingencia />
+    <router-outlet />
+  `,
 })
-export class App {
-  protected readonly title = signal('chibchaweb');
-}
+export class App {}

@@ -1,0 +1,12 @@
+id,nombre,correo,direccion,numeroTarjeta,telefono,vencimiento,franquicia
+L-001,Marta Rojas,marta.rojas@ejemplo.co,"Calle 45 # 12-30, Bogotá, 110221",4111111111111111,3101112233,2029-08-01,VISA
+L-002,Carlos Pardo,carlos.pardo@ejemplo.co,"Carrera 15 # 80-11, Bogotá, 110111",5555555555554444,3112223344,2028-05-01,MASTERCARD
+L-003,Diana Ortiz,diana.ortiz@ejemplo.co,"Avenida 6N # 23-10, Cali, 760045",30569309025904,3123334455,2030-01-01,DINERS
+L-004,Luis Herrera,luis.herrera@ejemplo.co,"Calle 100 # 8-55, Bogotá, 110111",4012888888881881,3134445566,2027-12-01,VISA
+L-005,Sandra Mejía,sandra.mejia@ejemplo.co,"Calle 72 # 10-07, Medellín, 050021",4222222222222,3145556677,2029-03-01,VISA
+L-006,Pedro Ruiz,correo-sin-arroba,"Calle 1 # 2-3, Bogotá, 110111",4111111111111111,3150000000,2029-01-01,VISA
+L-007,Elena Gil,elena.gil@ejemplo.co,"Calle 9 # 9-9, Bogotá, 110111",4111111111111111,3160000000,2023-01-01,VISA
+L-008,Raúl Mora,raul.mora@ejemplo.co,"Calle 3 # 4-5, Bogotá, 110111",4111111111111111,3170000000,2029-01-01,AMEX
+L-009,Inés Vega,ines.vega@ejemplo.co,"Calle 5 # 6-7, Bogotá, 110111",5555555555554444,3180000000,2029-01-01,VISA
+L-010,Tomás Cruz,marta.rojas@ejemplo.co,"Calle 8 # 1-2, Bogotá, 110111",4111111111111111,3190000000,2029-01-01,VISA
+L-011,Olga Peña,olga.pena@ejemplo.co,"Calle 8, Bogotá",4111111111111111,3190000001,2029-01-01,VISA

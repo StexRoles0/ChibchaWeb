@@ -1,0 +1,92 @@
+<section class="pagina">
+  <div>
+    <p class="migas">
+      <a routerLink="/cliente">Inicio</a> / <a routerLink="/cliente/perfil">Mi perfil</a> /
+      Modificar
+    </p>
+    <h1>Modificar perfil</h1>
+    <p class="subtitulo">Elige qué quieres cambiar. Se guarda un bloque a la vez.</p>
+  </div>
+
+  <div class="tarjeta">
+    <div class="pestanas" role="tablist" aria-label="Qué quieres modificar">
+      @for (t of pestanas; track t.categoria; let i = $index) {
+        <button
+          type="button"
+          role="tab"
+          class="pestana"
+          [id]="'pestana-' + t.categoria"
+          [attr.aria-selected]="activa() === t.categoria"
+          [attr.aria-controls]="'panel-' + t.categoria"
+          [attr.tabindex]="activa() === t.categoria ? 0 : -1"
+          (click)="cambiarPestana(t.categoria)"
+          (keydown)="teclado($event, i)"
+        >
+          {{ t.etiqueta }}
+        </button>
+      }
+    </div>
+
+    @if (store.error(); as e) {
+      <p class="aviso error" role="alert">{{ e }}</p>
+    }
+
+    @if (exito(); as m) {
+      <p class="aviso exito" role="status">{{ m }}</p>
+    }
+    @if (errorGeneral(); as m) {
+      <p class="aviso error" role="alert">{{ m }}</p>
+    }
+
+    @if (!listo()) {
+      @if (!store.error()) {
+        <p role="status">Cargando tus datos…</p>
+      }
+    } @else {
+      <div
+        class="panel"
+        role="tabpanel"
+        [id]="'panel-' + activa()"
+        [attr.aria-labelledby]="'pestana-' + activa()"
+      >
+        @switch (activa()) {
+          @case ('PERSONAL') {
+            <form [formGroup]="formPersonal" (ngSubmit)="guardar()" novalidate id="formulario">
+              <app-campos-personales
+                [form]="formPersonal"
+                [correo]="correo()"
+                [errores]="erroresPersonal.errores()"
+              />
+            </form>
+          }
+          @case ('PAQUETE_PLAN') {
+            <form (submit)="$event.preventDefault(); guardar()" novalidate id="formulario">
+              <p class="nota">El cambio de paquete o plan aplica desde tu próximo corte.</p>
+              <app-selector-paquete-plan
+                [paquetes]="paquetes()"
+                [planes]="planes()"
+                [(idPaquete)]="idPaquete"
+                [(idPlan)]="idPlan"
+              />
+            </form>
+          }
+          @case ('PAGO') {
+            <form [formGroup]="formPago" (ngSubmit)="guardar()" novalidate id="formulario">
+              <p class="nota">
+                Tarjeta actual: {{ store.perfil()?.tarjeta }}. Por seguridad, escribe de nuevo los
+                datos de la tarjeta; se vuelven a validar antes de guardarlos.
+              </p>
+              <app-campos-pago [form]="formPago" [errores]="erroresPago.errores()" />
+            </form>
+          }
+        }
+      </div>
+      <div class="acciones">
+        <button type="button" class="boton secundario" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="boton" form="formulario" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+      </div>
+    }
+  </div>
+</section>

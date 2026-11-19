@@ -25,12 +25,13 @@ backend/
 │   │   │                    # RegistradorDominio, FuenteLegada (ABC)
 │   │   ├── respaldo.py      # GestorContingencia, AlgoritmoCifrado(+4), MedioRespaldo, ArchivoPlano
 │   │   └── repositorios.py  # Repositorio* (ABC) + UnidadDeTrabajo
+│   ├── transaccion.py       # módulo neutro: cuenta de escrituras por transacción (D-33); solo importa Django
 │   ├── servicio/
 │   │   ├── dto.py           # @dataclass(frozen=True) de cada DTO + enums TipoEntidad, CategoriaPerfil
 │   │   └── servicios.py     # los 11 Servicio*; reciben repositorios/adaptadores por __init__
 │   ├── persistencia/
 │   │   ├── modelos_orm.py   # models.Model con managed=False y db_table de schema.sql
-│   │   ├── mapeadores.py    # Mapeador[T] (Generic, ABC) + 7 MapeadorX(Mapeador[X], RepositorioX)
+│   │   ├── mapeadores/      # paquete: Mapeador[T] (Generic, ABC) + 7 MapeadorX(Mapeador[X], RepositorioX)
 │   │   └── transacciones.py # UnidadDeTrabajoDjango
 │   ├── adaptadores/
 │   │   ├── oauth.py, pagos.py, registrador.py, legado.py   # AdaptadorX reales
@@ -55,18 +56,30 @@ Si un archivo pasa de unas 600 líneas, se convierte en paquete (`dominio/cuenta
 ```python
 class Suscripcion:
     """Contrato de hospedaje de un sitio (DC-MDO-01)."""
-    def __init__(self, titular: "Cliente", sitio: SitioWeb, paquete: PaqueteHosting, plan: PlanPago,
-                 fecha_inicio: date, id: int | None = None, fecha_corte: date | None = None,
-                 activa: bool = True, pagos: list["Pago"] | None = None):
+
+    def __init__(
+        self,
+        titular: "Cliente",
+        sitio: SitioWeb,
+        paquete: PaqueteHosting,
+        plan: PlanPago,
+        fecha_inicio: date,
+        id: int | None = None,
+        fecha_corte: date | None = None,
+        activa: bool = True,
+        pagos: list["Pago"] | None = None,
+    ):
         self._id = id
         ...
-    @property
-    def fecha_corte(self) -> date: return self._fecha_corte
 
-    def monto_del_periodo(self) -> Decimal:          # montoDelPeriodo(): Decimal
+    @property
+    def fecha_corte(self) -> date:
+        return self._fecha_corte
+
+    def monto_del_periodo(self) -> Decimal:  # montoDelPeriodo(): Decimal
         return self._paquete.calcular_monto(self._plan)
 
-    def cobrar(self, pasarela: PasarelaPago) -> "Pago":   # cobrar(pasarela): Pago
+    def cobrar(self, pasarela: PasarelaPago) -> "Pago":  # cobrar(pasarela): Pago
         ...
 ```
 
@@ -81,11 +94,14 @@ class Suscripcion:
 ```python
 class VistaEnrutamiento(APIView):
     permission_classes = [TieneOperacion("ATENDER_TICKETS")]
+
     @transaccional
     def post(self, request, id):
-        s = EnrutamientoSerializer(data=request.data); s.is_valid(raise_exception=True)
+        s = EnrutamientoSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
         contenedor().servicio_soporte.enrutar_por_nivel_servicio(
-            id, sesion_usuario(request).id_usuario, s.validated_data["escalar"], s.validated_data["observacion"])
+            id, sesion_usuario(request).id_usuario, s.validated_data["escalar"], s.validated_data["observacion"]
+        )
         return Response(status=204)
 ```
 
@@ -110,4 +126,4 @@ ruff check . && ruff format --check .
 python manage.py runserver 0.0.0.0:8000
 ```
 
-Dependencias base: `django>=5.0`, `djangorestframework`, `djangorestframework-camel-case`, `django-environ`, `psycopg[binary]`, `authlib`, `httpx`, `cryptography`, `twofish`. Desarrollo: `pytest`, `pytest-django`, `pytest-cov`, `import-linter`, `ruff`, `freezegun`.
+Dependencias base: `django>=5.0`, `djangorestframework`, `djangorestframework-camel-case`, `django-environ`, `psycopg[binary]`, `httpx`, `joserfc`, `cryptography`. Desarrollo: `pytest`, `pytest-django`, `pytest-cov`, `import-linter`, `ruff`, `freezegun`.

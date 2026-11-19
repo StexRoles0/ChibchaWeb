@@ -127,7 +127,7 @@ Qué hace cada capa:
 
 ## 7. Autenticación (OAuth 2.0 / OIDC)
 
-1. El frontend llama `GET /api/v1/auth/oauth/inicio`. El backend genera `state` y PKCE, los guarda en la sesión y devuelve la URL de autorización.
+1. El frontend llama `GET /api/v1/auth/oauth/inicio`. El backend genera `state` (sin PKCE: el intercambio lo hace un cliente confidencial, ver D-26), lo guarda en la sesión y devuelve la URL de autorización.
 2. El proveedor redirige a `/auth/callback?code=…&state=…` (ruta de Angular). Angular manda `POST /api/v1/auth/oauth/callback {codigo, estado}`.
 3. La vista compara el `state` y llama **una sola vez** `ServicioAcceso.iniciar_sesion(codigo)`, porque el código es de un solo uso.
 4. Si `registrado = true`, guarda en la sesión de Django `id_usuario`, `tipo_usuario`, `rol` y `operaciones`. Si `registrado = false`, guarda en la sesión la identidad pendiente (`identificadorExterno`, `nombre`, `correo`) y el frontend va a M-02.

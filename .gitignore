@@ -4,3 +4,7 @@ __pycache__/
 node_modules/
 .angular/
 dist/
+respaldo/
+.pytest_cache/
+.ruff_cache/
+*.sqlite3

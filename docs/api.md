@@ -53,7 +53,7 @@ interface ResultadoMigracionDTO { idProceso: number; validos: number; invalidos:
 ### Acceso — `ServicioAcceso`
 | Verbo y ruta | Permiso | Cuerpo → respuesta | Servicio |
 |---|---|---|---|
-| `GET /auth/oauth/inicio[?correo=]` | público | → `{ url }` | — (vista: state + PKCE). Con `SIMULAR_EXTERNOS`, `correo` es obligatorio y la URL es `/auth/callback?code=dev:<correo>&state=…` |
+| `GET /auth/oauth/inicio[?correo=]` | público | → `{ url }` | — (vista: solo `state`, sin PKCE; D-26). Con `SIMULAR_EXTERNOS`, `correo` es obligatorio y la URL es `/auth/callback?code=dev:<correo>&state=…` |
 | `POST /auth/oauth/callback` | público | `{ codigo, estado }` → `ResultadoAccesoDTO` | `iniciarSesion(codigo)` |
 | `GET /auth/sesion` | autenticado | → `ResultadoAccesoDTO` (de la sesión) | — |
 | `POST /auth/logout` | autenticado | → 204 | — |

@@ -1,7 +1,8 @@
-asgiref==3.12.1
-Django==6.1.2
-django-cors-headers==4.9.0
-djangorestframework==3.18.3
-psycopg==3.3.6
-psycopg-binary==3.3.6
-sqlparse==0.6.0
+django>=5.0
+djangorestframework
+djangorestframework-camel-case
+django-environ
+psycopg[binary]
+httpx
+cryptography>=43
+joserfc

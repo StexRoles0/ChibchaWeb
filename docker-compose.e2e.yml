@@ -1,0 +1,71 @@
+# Entorno e2e AISLADO (Fase 4). Proyecto propio "chibchaweb_e2e": BD con volumen propio sembrada con
+# schema.sql + seed_dev.sql, backend con SIMULAR_EXTERNOS=true y frontend (ng serve, backend real).
+# No toca la BD de desarrollo (volumen datos_pg16). Puertos del host: 14200 (frontend) y 18000 (API).
+# Uso: ver frontend/CLAUDE.md ("npm run e2e" desde frontend/). Aquí SÍ se puede usar "down -v".
+name: chibchaweb_e2e
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: chibchaweb
+      POSTGRES_USER: chibcha
+      POSTGRES_PASSWORD: chibcha123
+    volumes:
+      - datos_e2e:/var/lib/postgresql/data
+      - ./docs/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./docs/seed_dev.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chibcha -d chibchaweb"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgres://chibcha:chibcha123@db:5432/chibchaweb
+      DJANGO_SECRET_KEY: clave-solo-para-desarrollo-no-usar-en-produccion
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      CSRF_TRUSTED_ORIGINS: http://localhost:14200,http://127.0.0.1:14200
+      CLAVE_CIFRADO: ZGV2LWNsYXZlLWNpZnJhZG8tMzItYnl0ZXMtMDAwMDA=
+      ALGORITMO_CIFRADO: AES
+      RUTA_RESPALDO: /tmp/respaldo-e2e.log
+      SIMULAR_EXTERNOS: "true"
+      RUTA_DOCS: /docs
+      TZ: America/Bogota
+    volumes:
+      - ./docs:/docs:ro
+    ports:
+      - "18000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/api/v1/catalogo/paquetes')"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    # Sin recarga en vivo ni polling: el código no cambia durante la corrida.
+    command: ["npx", "ng", "serve", "--host", "0.0.0.0", "--configuration", "docker", "--live-reload=false", "--hmr=false"]
+    environment:
+      NG_CLI_ANALYTICS: "false"
+    ports:
+      - "14200:4200"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:4200/acceso"]
+      interval: 3s
+      timeout: 5s
+      retries: 60
+
+volumes:
+  datos_e2e:

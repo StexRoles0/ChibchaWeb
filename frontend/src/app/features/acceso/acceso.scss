@@ -1,0 +1,157 @@
+.pagina-acceso {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  min-height: 100vh;
+}
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 80px;
+  overflow: hidden;
+  color: var(--blanco);
+  background: var(--verde);
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 40%;
+    bottom: -220px;
+    width: 520px;
+    height: 520px;
+    border: 56px solid rgb(217 154 30 / 22%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+}
+
+.hero-texto {
+  position: relative;
+  z-index: 1;
+}
+
+.titular {
+  max-width: 440px;
+  margin-bottom: 18px;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+.bajada {
+  max-width: 460px;
+  font-size: 16px;
+  opacity: 0.88;
+}
+
+.panel {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.caja {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(480px, 100%);
+
+  h1 {
+    font-size: 28px;
+  }
+}
+
+.intro {
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: var(--tinta-2);
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 52px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--tinta);
+  cursor: pointer;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+
+  &:hover:not(:disabled) {
+    border-color: var(--verde-2);
+  }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
+}
+
+.id {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 26px;
+  font-size: 13px;
+  color: var(--blanco);
+  background: var(--tinta);
+  border-radius: 6px;
+}
+
+.separador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+  font-size: 14px;
+  color: var(--tinta-2);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--linea);
+  }
+}
+
+.nota {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--azul);
+  background: var(--azul-claro);
+  border: 1px solid #c9daf0;
+  border-radius: 8px;
+}
+
+.prueba {
+  padding: 12px 14px;
+  background: var(--oro-claro);
+  border: 1px dashed var(--oro);
+  border-radius: 8px;
+}
+
+.con-error input {
+  border-color: var(--rojo);
+}
+
+@media (max-width: 768px) {
+  .pagina-acceso {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero {
+    padding: 24px;
+  }
+
+  .hero-texto {
+    display: none;
+  }
+}

@@ -1,0 +1,9 @@
+# Tareas programadas (D-09). Formato cron de supercronic. Zona horaria del contenedor (TZ=America/Bogota).
+# Horarios de docs/api.md §Tareas programadas. Ninguna corre mientras haya eventos pendientes en el respaldo
+# de contingencia (RT04): hay que sincronizar antes.
+# CU-FAC-01: carga de pagos, todos los días a las 02:00 (fecha de corte = hoy)
+0 2 * * * python manage.py cargar_pagos
+# CU-COM-01: cálculo de comisiones, día 1 de cada mes a las 03:00, para el mes anterior (sin --inicio/--fin)
+0 3 1 * * python manage.py calcular_comisiones
+# CU-COM-02: generación de cheques de las comisiones sin cheque, día 1 de cada mes a las 03:30
+30 3 1 * * python manage.py generar_cheques

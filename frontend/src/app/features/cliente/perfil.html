@@ -1,0 +1,100 @@
+<section class="pagina">
+  <div>
+    <p class="migas"><a routerLink="/cliente">Inicio</a> / Mi perfil</p>
+    <h1>Mi perfil</h1>
+    <p class="subtitulo">Consulta tus datos y elige qué deseas hacer.</p>
+  </div>
+
+  @if (store.error(); as e) {
+    <div class="aviso error" role="alert">
+      <p>{{ e }}</p>
+      <button type="button" class="boton secundario reintento" (click)="store.cargar()">
+        Reintentar
+      </button>
+    </div>
+  } @else if (store.perfil(); as p) {
+    <div class="datos">
+      <section class="tarjeta" aria-labelledby="t-personales">
+        <h2 id="t-personales">Datos personales</h2>
+        <dl>
+          <dt>Nombre</dt>
+          <dd>{{ p.nombre }}</dd>
+          <dt>Correo</dt>
+          <dd>{{ p.correo }}</dd>
+          <dt>Teléfono</dt>
+          <dd>{{ p.telefono }}</dd>
+          <dt>Residencia</dt>
+          <dd>{{ p.lineaResidencia }}, {{ p.ciudadResidencia }}</dd>
+          <dt>Distribuidor</dt>
+          <dd>{{ p.distribuidor || 'Sin distribuidor' }}</dd>
+        </dl>
+      </section>
+      <section class="tarjeta" aria-labelledby="t-hospedaje">
+        <h2 id="t-hospedaje">Hospedaje y pago</h2>
+        <dl>
+          <dt>Sitio</dt>
+          <dd>{{ p.sitio }}</dd>
+          <dt>Plataforma</dt>
+          <dd>{{ plataforma(p.plataforma) }}</dd>
+          <dt>Paquete</dt>
+          <dd>{{ p.paquete }}</dd>
+          <dt>Plan</dt>
+          <dd>{{ p.plan }}</dd>
+          <dt>Medio de pago</dt>
+          <dd>{{ p.tarjeta }} · vence {{ vencimiento(p.vencimiento) }}</dd>
+        </dl>
+      </section>
+    </div>
+  } @else {
+    <p role="status">Cargando tu perfil…</p>
+  }
+
+  <nav class="acciones" aria-label="Acciones del perfil">
+    <a class="tarjeta accion" routerLink="/cliente/perfil/editar">
+      <span class="ficha" aria-hidden="true">✎</span>
+      <span>
+        <strong>Modificar perfil</strong>
+        <span class="detalle">Cambiar tus datos, paquete y plan, o tarjeta</span>
+      </span>
+      <span class="flecha" aria-hidden="true">→</span>
+    </a>
+    <a class="tarjeta accion peligro" routerLink="/cliente/perfil/eliminar">
+      <span class="ficha" aria-hidden="true">✕</span>
+      <span>
+        <strong>Eliminar perfil</strong>
+        <span class="detalle">Dar de baja tu cuenta</span>
+      </span>
+      <span class="flecha" aria-hidden="true">→</span>
+    </a>
+  </nav>
+</section>
+
+@if (eliminando()) {
+  <app-dialogo-confirmacion
+    titulo="Eliminar tu cuenta"
+    textoConfirmar="Eliminar mi cuenta"
+    [peligro]="true"
+    [deshabilitado]="!confirmado()"
+    [ocupado]="ocupado()"
+    (confirmar)="eliminar()"
+    (cancelar)="cancelarEliminar()"
+  >
+    <p class="aviso advertencia">
+      Tu perfil quedará inactivo, se suspenderá tu hospedaje y perderás el acceso. Esta acción no se
+      puede deshacer desde la aplicación.
+    </p>
+    @if (errorEliminar(); as e) {
+      <p class="aviso error" role="alert">{{ e }}</p>
+    }
+    <div class="campo">
+      <label for="correo-confirmacion">Escribe tu correo para confirmar</label>
+      <input
+        id="correo-confirmacion"
+        type="email"
+        autocomplete="off"
+        data-foco-inicial
+        [formControl]="correoConfirmacion"
+      />
+    </div>
+  </app-dialogo-confirmacion>
+}
